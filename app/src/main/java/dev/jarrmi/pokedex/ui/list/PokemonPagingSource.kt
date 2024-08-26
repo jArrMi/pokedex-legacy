@@ -14,7 +14,7 @@ class PokemonPagingSource(
 ) : PagingSource<Int, Pokemon>() {
 
     private companion object {
-        private const val STARTING_PAGE_INDEX = 1
+        private const val STARTING_PAGE_INDEX = 0
         private const val TAG = "PokemonPagingSource"
     }
 
@@ -22,7 +22,8 @@ class PokemonPagingSource(
         val anchorPosition = state.anchorPosition
         val refreshKey = state.run {
             anchorPosition?.let {
-                closestPageToPosition(it)?.prevKey?.plus(1) ?: closestPageToPosition(it)?.nextKey?.minus(1)
+                closestPageToPosition(it)?.prevKey?.plus(1)
+                    ?: closestPageToPosition(it)?.nextKey?.minus(1)
             }
         }
         Log.d(TAG, "getRefreshKey: anchorPosition=$anchorPosition, refreshKey=$refreshKey")
@@ -39,17 +40,12 @@ class PokemonPagingSource(
                 limit = params.loadSize,
             )
             val pokemon = response.data ?: emptyList()
-            val nextKey = if (pokemon.isEmpty()) {
-                null
-            } else {
-                position + params.loadSize
-            }
-
+            val nextKey = (position + params.loadSize).takeUnless { pokemon.isEmpty() }
             Log.d(TAG, "load: fetched ${pokemon.size} items, nextKey=$nextKey")
 
             LoadResult.Page(
                 data = pokemon,
-                prevKey = if (position == STARTING_PAGE_INDEX) null else position - 1,
+                prevKey = (position - 1).takeUnless { position == STARTING_PAGE_INDEX },
                 nextKey = nextKey,
             )
         } catch (exception: IOException) {
