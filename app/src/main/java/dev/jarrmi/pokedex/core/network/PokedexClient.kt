@@ -4,6 +4,7 @@ import android.util.Log
 import dev.jarrmi.pokedex.core.model.Pokemon
 import dev.jarrmi.pokedex.core.network.model.Details
 import dev.jarrmi.pokedex.core.network.model.ResultState
+import kotlinx.coroutines.delay
 import retrofit2.HttpException
 import java.io.IOException
 
@@ -25,6 +26,9 @@ class PokedexClient(
             val response = service.fetchPokemonList(limit = limit, offset = offset)
             Log.d(TAG, "fetchPokemonList: raw response=${response}")
             Log.d(TAG, "fetchPokemonList: fetched ${response.results.size} items")
+            if (offset > 0) {
+                delay(15_000L)
+            }
             ResultState.Success(response.results)
         } catch (e: HttpException) {
             Log.e(TAG, "fetchPokemonList: HttpException", e)

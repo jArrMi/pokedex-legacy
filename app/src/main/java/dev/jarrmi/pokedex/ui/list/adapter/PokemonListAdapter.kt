@@ -23,45 +23,27 @@ fun createImageLoader(context: Context): ImageLoader {
                 .maxSizePercent(0.25) // Use 25% of the app's available memory
                 .build()
         }
-        diskCachePolicy(CachePolicy.ENABLED) // Enable disk caching
-        memoryCachePolicy(CachePolicy.ENABLED) // Enable memory caching
+        diskCachePolicy(CachePolicy.ENABLED)
+        memoryCachePolicy(CachePolicy.ENABLED)
         logger(DebugLogger())
     }.build()
 }
 
-class PokemonListAdapter : PagingDataAdapter<Pokemon, PokemonListAdapter.MyViewHolder>(
+class PokemonListAdapter : PagingDataAdapter<Pokemon, PokemonListAdapter.PokemonViewHolder>(
     diffCallback = DiffCallback,
 ) {
 
-    class MyViewHolder(internal val binding: LayoutPokemonItemBinding) :
-        RecyclerView.ViewHolder(/* itemView = */ binding.root
-        ) {
-        fun bind(pokemon: Pokemon) {
-            binding.itemPokemonName.text = pokemon.formattedName
-            binding.itemPokemonImage.load(
-                data = pokemon.listingImageUrl, imageLoader = createImageLoader(itemView.context)
-            ) {
-                crossfade(true)
-                placeholder(R.drawable.pokeball)
-                error(R.drawable.missignno)
-            }
-        }
-    }
-
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MyViewHolder {
-        val binding =
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PokemonViewHolder {
+        return PokemonViewHolder(
             LayoutPokemonItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        return MyViewHolder(binding)
+        )
     }
 
-    override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
-        val pokemon = getItem(position)
-        if (pokemon != null) {
-            holder.bind(pokemon)
-        }
+    override fun onBindViewHolder(holder: PokemonViewHolder, position: Int) {
+        getItem(position)?.let { holder.bind(it) }
     }
 
-    override fun onViewRecycled(holder: MyViewHolder) {
+    override fun onViewRecycled(holder: PokemonViewHolder) {
         super.onViewRecycled(holder)
         holder.binding.itemPokemonImage.dispose()
     }
@@ -74,6 +56,19 @@ class PokemonListAdapter : PagingDataAdapter<Pokemon, PokemonListAdapter.MyViewH
 
             override fun areContentsTheSame(oldItem: Pokemon, newItem: Pokemon): Boolean {
                 return oldItem == newItem
+            }
+        }
+    }
+
+    class PokemonViewHolder(internal val binding: LayoutPokemonItemBinding) : RecyclerView.ViewHolder(binding.root) {
+        fun bind(pokemon: Pokemon) {
+            binding.itemPokemonName.text = pokemon.formattedName
+            binding.itemPokemonImage.load(
+                data = pokemon.listingImageUrl, imageLoader = createImageLoader(itemView.context)
+            ) {
+                crossfade(true)
+                placeholder(R.drawable.pokeball)
+                error(R.drawable.missignno)
             }
         }
     }

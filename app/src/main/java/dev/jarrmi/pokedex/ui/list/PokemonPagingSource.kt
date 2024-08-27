@@ -5,6 +5,7 @@ import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import dev.jarrmi.pokedex.core.model.Pokemon
 import dev.jarrmi.pokedex.core.network.PokedexClient
+import dev.jarrmi.pokedex.core.network.model.ResultState
 import retrofit2.HttpException
 import java.io.IOException
 import kotlin.math.max
@@ -22,8 +23,7 @@ class PokemonPagingSource(
         val anchorPosition = state.anchorPosition
         val refreshKey = state.run {
             anchorPosition?.let {
-                closestPageToPosition(it)?.prevKey?.plus(1)
-                    ?: closestPageToPosition(it)?.nextKey?.minus(1)
+                closestPageToPosition(it)?.prevKey?.plus(1) ?: closestPageToPosition(it)?.nextKey?.minus(1)
             }
         }
         Log.d(TAG, "getRefreshKey: anchorPosition=$anchorPosition, refreshKey=$refreshKey")
@@ -39,6 +39,10 @@ class PokemonPagingSource(
                 offset = position,
                 limit = params.loadSize,
             )
+            if (response is ResultState.Error) {
+                return LoadResult.Error(Exception(response.details.message))
+            }
+
             val pokemon = response.data ?: emptyList()
             val nextKey = (position + params.loadSize).takeUnless { pokemon.isEmpty() }
             Log.d(TAG, "load: fetched ${pokemon.size} items, nextKey=$nextKey")
