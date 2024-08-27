@@ -36,7 +36,7 @@ class MainActivity : AppCompatActivity() {
         val pokemonAdapter = PokemonListAdapter()
         binding.mainScreenList.run {
             layoutManager = LinearLayoutManager(this@MainActivity)
-            adapter = pokemonAdapter.withLoadStateFooter(LoadingStateAdapter({ }))
+            adapter = pokemonAdapter.withLoadStateFooter(LoadingStateAdapter(pokemonAdapter::retry))
         }
 
         lifecycleScope.launch {

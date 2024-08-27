@@ -49,6 +49,7 @@ dependencies {
     implementation(libs.coil)
     implementation(libs.gson)
     implementation(libs.koin.android)
+    implementation(libs.lottie)
     implementation(libs.okhttp)
     implementation(libs.retrofit)
     implementation(libs.retrofit.converter.gson)
